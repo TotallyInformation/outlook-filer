@@ -4,7 +4,8 @@ A Simple interface for filing emails when you have many folders.
 This utility can save vast amounts of time if, like me, you have many (hundreds of) folders and receive large amounts of email that must be kept and filed.
 
 # Installation
- - Download the *.frm and *.frx files. 
+ - Download the [latest release](https://github.com/TotallyInformation/outlook-filer/releases/latest)
+ - Unpack the *.frm and *.frx files to somewhere convenient.
  - Open the VBA project editor - you can use the alt-f11 keyboard shortcut
  - Import the *.frm file
  - Insert a new Module
