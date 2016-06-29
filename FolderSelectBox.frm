@@ -1,12 +1,12 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FolderSelectBox 
    Caption         =   "Select Folder for Filing"
-   ClientHeight    =   5380
+   ClientHeight    =   5376
    ClientLeft      =   120
-   ClientTop       =   465
-   ClientWidth     =   10695
+   ClientTop       =   472
+   ClientWidth     =   10704
    OleObjectBlob   =   "FolderSelectBox.frx":0000
-   StartUpPosition =   1  'CenterOwner
+   StartUpPosition =   3  'Windows Default
    WhatsThisHelp   =   -1  'True
 End
 Attribute VB_Name = "FolderSelectBox"
@@ -34,16 +34,20 @@ Attribute VB_Exposed = False
 '   2) Add ability to move to another mailbox (http://www.slipstick.com/developer/working-vba-nondefault-outlook-folders/)
 '   3) Allow multiple filters for full folder list
 '   4) Pre-populate multi filters from conversation subject
+'   5) List of recently selected folders
 '
 ' Author: Julian Knight (Totally Information)
-' Version: v1.0 20015-05-08
+' Version: v1.3 20015-06-12
 ' History:
+'   v1.4 20015-06-29 - Chg default location to Win default. Add auto-selects. Add recents list (not yet working)
+'   v1.3 20015-06-12 - Add copy link to clipboard after moving
 '   v1.2 20015-05-18 - Add double-click processing
 '   v1.1 20015-05-12 - Various improvements - add filter to full folder list, add view button
 '   v1.0 20015-05-08 - Initial Release
 
 Option Explicit
-    
+
+' Define form global variables
 Dim folderNames(0 To 99) As String
 Dim maxNames As Long
 Dim folderPaths(0 To 99) As String
@@ -53,18 +57,20 @@ Dim maxFAP As Long
 Dim folderAllNames(0 To 999) As String
 Dim maxFAN As Long
 Dim mailbox As String
+Dim exitDelay As Long ' seconds to delay closure of form to allow copy of link
 
 Private Sub btnCancel_Click()
     ' Do nothing other than cancel everything
     Unload Me
 End Sub
 
+' Only change the current view to the selected folder
 Private Sub btnView_Click()
     Dim fldr As Outlook.MAPIFolder
     Dim objItem As Outlook.MailItem
     
     Set fldr = fldrDest
-    ' If anywhere to move to, move each email now
+    ' If anywhere selected, change the explorer view now
     If IsObject(fldr) Then
         Set Application.ActiveExplorer.CurrentFolder = fldr
     End If
@@ -75,6 +81,7 @@ Private Sub btnView_Click()
     Unload Me
 End Sub
 
+' Do the move
 Private Sub btnFileToFolder_Click()
     Dim fldr As Outlook.MAPIFolder
     Dim objItem As Outlook.MailItem
@@ -84,12 +91,15 @@ Private Sub btnFileToFolder_Click()
     On Error GoTo err
     ' If anywhere to move to, move each email now
     If IsObject(fldr) Then
+        ' Also add the selected destination to the top of the recents list
+        lstRecent.AddItem fldr.Name
         x = 0
         For Each objItem In ActiveExplorer.Selection
             ' Only move items not already in the dest folder
             If objItem.Parent.Name <> fldr.Name Then
                 objItem.Move fldr
                 x = x + 1
+                AddLinkToMessage objItem
             End If
         Next objItem
     End If
@@ -102,6 +112,8 @@ endit:
     On Error GoTo 0
     Set fldr = Nothing
     Set objItem = Nothing
+    ' Delay exit to allow time to copy the new link
+    WaitFor (5)
     Unload Me
 End Sub
 
@@ -202,13 +214,39 @@ Private Function ReturnDestinationFolder(findStr As Variant, fldrs As Outlook.Fo
 
 End Function
 
+Private Sub lstAllFolders_Change()
+    
+    'Deselect the previously selected folder
+    lstFolders.Selected(0) = False
+    
+End Sub
+
 Private Sub lstAllFolders_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    
+    'Deselect the previously selected folder
+    lstFolders.Selected(0) = False
+    
     Call btnFileToFolder_Click
+    
+End Sub
+
+Private Sub lstFolders_Change()
+    
+    'deselect the first from the all folders list
+    lstAllFolders.Selected(0) = False
+    
 End Sub
 
 Private Sub lstFolders_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    
+    'deselect the first from the all folders list
+    lstAllFolders.Selected(0) = False
+    
     Call btnFileToFolder_Click
+    
 End Sub
+
+
 
 'Private Sub tbFilterAllFolders_BeforeUpdate(ByVal Cancel As MSForms.ReturnBoolean)
 '    With Me.tbFilterAllFolders
@@ -221,7 +259,9 @@ End Sub
 '
 'End Sub
 
+' If the text box contents change, begin filtering
 Private Sub tbFilterAllFolders_Change()
+    
     With Me.tbFilterAllFolders
         If .Value = vbNullString Then
             Me.lstAllFolders.List = folderAllNames
@@ -229,8 +269,15 @@ Private Sub tbFilterAllFolders_Change()
             Me.lstAllFolders.List = Filter(SourceArray:=folderAllNames, match:=.Value, Compare:=vbTextCompare)
         End If
     End With
+    
+    'When filtering, select the first from the all folders list
+    lstAllFolders.Selected(0) = True
+    'Deselect the previously selected folder
+    lstFolders.Selected(0) = False
+
 End Sub
 
+' Set up the form
 Private Sub UserForm_Initialize()
 
     Dim objItem As Object
@@ -238,6 +285,18 @@ Private Sub UserForm_Initialize()
     Dim numSelected As Long
     Dim numEmailsSelected As Long
     Dim mb
+    
+    Dim x As Object
+    Set x = Application
+    
+    'Start Userform Centered inside Excel Screen (for dual monitors)
+    ' From http://www.thespreadsheetguru.com/the-code-vault/launch-vba-userforms-in-correct-window-with-dual-monitors
+    'Me.StartUpPosition = 3
+    'Me.Left = Application.ActiveWindow.Left + (0.5 * Application.ActiveWindow.Width) - (0.5 * Me.Width)
+    'Me.Top = Application.ActiveWindow.Top + (0.5 * Application.ActiveWindow.Height) - (0.5 * Me.Height)
+    'Debug.Print Me.Left, Me.Top
+    
+    'List of accounts: Application.Session.Accounts
     
     ' Walk through all selected emails and compile a list of folders
     ' that they are in. Ignore the inbox
@@ -250,6 +309,7 @@ Private Sub UserForm_Initialize()
         numSelected = numSelected + 1
         ' Only interested in real mail items (not calendar entries, cancellation notices, etc.)
         If objItem.MessageClass = "IPM.Note" Then
+            ' How many items?
             numEmailsSelected = numEmailsSelected + 1
             ' Check that parent item really is a folder
             If objItem.Parent.Class = olFolder Then
@@ -282,18 +342,34 @@ Private Sub UserForm_Initialize()
     'Debug.Print "# Emails Sel:", numEmailsSelected
     'Debug.Print "# Folders:", i, "(Igoring Inbox)"
     
+    ' Show the list of folders where any of the selected items are already filed
     lstFolders.List = folderNames
     
-    'GetAllFolders
+    ' a selected email already filed so pre-select the first folder in that list
+    If i > 0 Then
+      lstFolders.Selected(0) = True
+    End If
+    
+    'Create the AllFolders list
     maxFAP = 0
     maxFAN = 0
     ProcessFolder Application.Session.GetDefaultFolder(olFolderInbox).Parent
+    
+    'If no selected folder, select the first from the all folders list
+    'Useful for filtering
+    If lstFolders.Selected(0) = False Then
+      lstAllFolders.Selected(0) = True
+    End If
     
     Set objItem = Nothing
     
 End Sub
 
-Sub ProcessFolder(objStartFolder As Outlook.MAPIFolder, Optional blnRecurseSubFolders As Boolean = True, Optional strFolderPath As String = "", Optional strFolderName As String = "")
+' Create the all-folder list
+Sub ProcessFolder(objStartFolder As Outlook.MAPIFolder, _
+                  Optional blnRecurseSubFolders As Boolean = True, _
+                  Optional strFolderPath As String = "", _
+                  Optional strFolderName As String = "")
 
     Dim objFolder As Outlook.MAPIFolder
 
@@ -333,6 +409,7 @@ Sub ProcessFolder(objStartFolder As Outlook.MAPIFolder, Optional blnRecurseSubFo
                 mailbox = mb(2)
             End If
 
+            ' Add to the All Folder List
             lstAllFolders.AddItem strFolderName + "\" + objFolder.Name
             folderAllPaths(maxFAP) = objFolder.folderPath
             maxFAP = maxFAP + 1
@@ -351,6 +428,40 @@ Sub ProcessFolder(objStartFolder As Outlook.MAPIFolder, Optional blnRecurseSubFo
     Set objFolder = Nothing
 
 End Sub
+
+' Create an outlook: link to a msg
+Sub AddLinkToMessage(objMail As Outlook.MailItem)
+    'Dim objMail As Object
+    'was earlier Outlook.MailItem
+    'Dim doClipboard As New DataObject
+    Dim txt As String
+      
+    'One and ONLY one message muse be selected
+    'Set objMail = Application.ActiveExplorer.Selection.Item(1)
+    
+    'If objMail.Class = olMail Then
+    '    txt = "outlook:" + objMail.EntryID + "][MESSAGE: " + objMail.Subject + " (" + objMail.SenderName + ")"
+    'ElseIf objMail.Class = olAppointment Then
+    '    txt = "outlook:" + objMail.EntryID + "][MEETING: " + objMail.Subject + " (" + objMail.Organizer + ")"
+    'ElseIf objMail.Class = olTask Then
+    '    txt = "outlook:" + objMail.EntryID + "][TASK: " + objMail.Subject + " (" + objMail.Owner + ")>"
+    'ElseIf objMail.Class = olContact Then
+    '    txt = "outlook:" + objMail.EntryID + "][CONTACT: " + objMail.Subject + " (" + objMail.FullName + ")"
+    'ElseIf objMail.Class = olJournal Then
+    '    txt = "outlook:" + objMail.EntryID + "][JOURNAL: " + objMail.Subject + " (" + objMail.Type + ")"
+    'ElseIf objMail.Class = olNote Then
+    '    txt = "outlook:" + objMail.EntryID + "][NOTE: " + objMail.Subject + " (" + " " + ")"
+    'Else
+    '    txt = "outlook:" + objMail.EntryID + "][ITEM: " + objMail.Subject + " (" + objMail.MessageClass + ")"
+    'End If
+    
+    txt = "outlook:" + objMail.EntryID
+    
+    ' Replace all spaces with %20
+    CopyTextToClipboard (Replace(txt, " ", "%20"))
+    
+End Sub
+
 
 ' ---- Functions from other people ----
 
@@ -373,4 +484,33 @@ err:
     Debug.Print "poo"
 End Function
 
+' @see: http://www.thespreadsheetguru.com/blog/2015/1/13/how-to-use-vba-code-to-copy-text-to-the-clipboard
+Sub CopyTextToClipboard(txt As String)
+    'PURPOSE: Copy a given text to the clipboard (using DataObject)
+    'SOURCE: www.TheSpreadsheetGuru.com
+    'NOTES: Must enable Forms Library: Checkmark Tools > References > Microsoft Forms 2.0 Object Library
+    
+    Dim obj As New DataObject
+    
+    'Make object's text equal above string variable
+    obj.SetText txt
+    
+    'Place DataObject's text into the Clipboard
+    ' >> WARNING: Not working in Windows 8.1! Just get "??" instead of content <<
+    'obj.PutInClipboard
+    tbLink.Value = txt
+    
+    'Notify User
+    'MsgBox txt, vbInformation
 
+End Sub
+
+Sub WaitFor(NumOfSeconds As Long)
+    Dim SngSec As Long
+    SngSec = Timer + NumOfSeconds
+    
+    Do While Timer < SngSec
+        DoEvents
+    Loop
+
+End Sub
