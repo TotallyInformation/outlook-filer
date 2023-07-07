@@ -1,8 +1,8 @@
 # outlook-filer
-A Simple interface for filing emails when you have many folders. Created by Julian at TotallyInformation
+A Simple interface for filing emails when you have many folders. Created by [Julian at TotallyInformation](https://github.com/TotallyInformation/)
 This utility can save vast amounts of time if, like me, you have many (hundreds of) folders and receive large amounts of email that must be kept and filed.
 
-I have updated this to work with office 365 (without knowledge of how the original looked).
+I ([nicoleahmed](https://github.com/nicoleahmed/)) have updated this to work with office 365 (without knowledge of how the original looked).
 I've also added a refresh button for working with new email selections in the outlook window. I've added the recent folders section though these folders can't be sent to at the moment.
 
 **The biggest limitation at the moment is that only folders directly under the default inbox can be sent to and viewed**
