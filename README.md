@@ -8,7 +8,7 @@ I've also added a refresh button for working with new email selections in the ou
 **The biggest limitation at the moment is that only folders directly under the default inbox can be sent to and viewed**
 
 # Installation
- - Download the frm and frx file. Import these into your outlook vba project.
+ - Download the filingbox frm and frx files. Import the frm file into your outlook vba project (frx is automatically imported).
  - Add the following code to "this outlook session"
 ```VBA
 Sub Filing()
@@ -50,6 +50,16 @@ If you have your Outlook view in a conversation view mode, you can expand the co
 When you have many folders, it can be difficult to spot where they all are in the list - especially if you have sub-folders.
 
 This utility will help. If you can remember part of the folder name, click on the macro button, type in some characters to folder the list, select the required folder and click on the View button instead of File.
+
+
+# Remaining tasks
+   2) Add ability to move to another mailbox (http://www.slipstick.com/developer/working-vba-nondefault-outlook-folders/)
+   3) Allow multiple filters for full folder list
+   4) Pre-populate multi filters from conversation subject
+   5) List of recently selected folders (added by Nicole)
+   6) Double click to choose from recently selected folders
+   7) Send to all subfolders, not just 1st level below default inbox
+   8) View all subfolders not just 1st level below default inbox
 
 # License
 This utility including the code and the documentation is released under an [Apache 2.0 license](https://github.com/TotallyInformation/outlook-filer/blob/master/LICENSE).
