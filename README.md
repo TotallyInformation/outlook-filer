@@ -7,6 +7,7 @@ I've also added a refresh button for working with new email selections in the ou
 
 **The biggest limitation at the moment is that only folders directly under the default inbox can be sent to and viewed**
 
+![screenshot](https://github.com/nicoleahmed/outlook-filer/blob/master/outlookfilernicoleedit.PNG?raw=true)
 # Installation
  - Download the filingbox frm and frx files. Import the frm file into your outlook vba project (frx is automatically imported).
  - Add the following code to "this outlook session"
