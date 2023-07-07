@@ -1,10 +1,27 @@
 # outlook-filer
-A Simple interface for filing emails when you have many folders.
-
+A Simple interface for filing emails when you have many folders. Created by Julian at TotallyInformation
 This utility can save vast amounts of time if, like me, you have many (hundreds of) folders and receive large amounts of email that must be kept and filed.
 
+I have updated this to work with office 365 (without knowledge of how the original looked).
+I've also added a refresh button for working with new email selections in the outlook window. I've added the recent folders section though these folders can't be sent to at the moment.
+
+**The biggest limitation at the moment is that only folders directly under the default inbox can be sent to and viewed**
+
 # Installation
- - Download the [latest release](https://github.com/TotallyInformation/outlook-filer/releases/latest)
+ - Download the frm and frx file. Import these into your outlook vba project.
+ - Add the following code to "this outlook session"
+```VBA
+Sub Filing()
+   Filingbox.Show
+End Sub
+```
+
+ - Make sure that you have changed the settings to allow Outlook to run your code. 
+   You may wish to create a self-signed code signing certificate and sign your VBA code with that.
+ - Customise the Ribbon, adding the ```Filing``` macro as a button wherever convenient.
+
+# See the original
+ - Download the [original latest release](https://github.com/TotallyInformation/outlook-filer/releases/latest)
  - Unpack the *.frm and *.frx files to somewhere convenient.
  - Open the VBA project editor - you can use the alt-f11 keyboard shortcut
  - Import the *.frm file
@@ -18,10 +35,6 @@ Sub FileToFolder()
     FolderSelectBox.Show
 End Sub
 ```
-
- - Make sure that you have changed the settings to allow Outlook to run your code. 
-   You may wish to create a self-signed code signing certificate and sign your VBA code with that.
- - Customise the Ribbon, adding the ```FileToFolder``` macro as a button wherever convenient.
 
 # Basic Use
  - Select one or more emails, click on the macro button.
