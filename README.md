@@ -1,9 +1,11 @@
 # outlook-fileMe
-A very useful bit of VBA macro for Outlook written by [Julian at TotallyInformation](https://github.com/TotallyInformation/).
-If you select several emails (say for example a conversation thread or from a search) and atleast one of those emails is in a different folder to the inbox or sent items, this macro files every selected item in the other folder.
-Tested working with Office365 - but required a few attempts with the macro on occasion. Also works across different mailboxes, not just the default box.
+A very useful VBA macro for Outlook written by [Julian at TotallyInformation](https://github.com/TotallyInformation/).
+Select several emails (say for example a conversation thread or from a search) and if atleast one of those emails is in a different folder to the inbox or sent items, this macro files every selected item in the other folder.
+Tested - working with Office365 - but required a few attempts with the macro on occasion. Also works across multiple mailboxes, not just the default one.
 ## Installation
 Copy code for 2 subs from [fileMe.vba](https://github.com/nicoleahmed/outlook-filer/blob/master/fileMe.vba) and insert into either "ThisOutlookSession" or as a new module. 
+
+
 
 # outlook-filer
 A Simple interface for filing emails when you have many folders. Created by [Julian at TotallyInformation](https://github.com/TotallyInformation/)
