@@ -1,10 +1,38 @@
-# outlook-filer
-A Simple interface for filing emails when you have many folders.
+# outlook-fileMe
+A very useful VBA macro for Outlook written by [Julian at TotallyInformation](https://github.com/TotallyInformation/).
+Select several emails (say for example a conversation thread or from a search) and if atleast one of those emails is in a different folder to the inbox or sent items, this macro files every selected item in the other folder.
+Tested - working with Office365 - but required a few attempts with the macro on occasion. Also works across multiple mailboxes, not just the default one.
+## Installation
+Copy code for 2 subs from [fileMe.vba](https://github.com/nicoleahmed/outlook-filer/blob/master/fileMe.vba) and insert into either "ThisOutlookSession" or as a new module. 
 
+
+
+# outlook-filer
+A Simple interface for filing emails when you have many folders. Created by [Julian at TotallyInformation](https://github.com/TotallyInformation/)
 This utility can save vast amounts of time if, like me, you have many (hundreds of) folders and receive large amounts of email that must be kept and filed.
 
+I ([nicoleahmed](https://github.com/nicoleahmed/)) have updated this to work with office 365 (without knowledge of how the original looked).
+I've also added a refresh button for working with new email selections in the outlook window. I've added the recent folders section though these folders can't be sent to at the moment.
+Julian has [commented](https://github.com/TotallyInformation/outlook-filer/issues/3#issuecomment-1637108600) that there'll be no further dev on the VBA macros and form. I think I'll start looking at JavaScript for addins too..
+
+**The biggest limitation at the moment is that only folders directly under the default inbox can be sent to and viewed**
+
+![screenshot](https://github.com/nicoleahmed/outlook-filer/blob/master/outlookfilernicoleedit.PNG?raw=true)
 # Installation
- - Download the [latest release](https://github.com/TotallyInformation/outlook-filer/releases/latest)
+ - Download the filingbox [frm](https://github.com/nicoleahmed/outlook-filer/blob/master/Filingbox.frm) and [frx](https://github.com/nicoleahmed/outlook-filer/blob/master/Filingbox.frx) files. Import the frm file into your outlook vba project (frx is automatically imported).
+ - Add the following code to "this outlook session"
+```VBA
+Sub Filing()
+   Filingbox.Show
+End Sub
+```
+
+ - Make sure that you have changed the settings to allow Outlook to run your code. 
+   You may wish to create a self-signed code signing certificate and sign your VBA code with that.
+ - Customise the Ribbon, adding the ```Filing``` macro as a button wherever convenient.
+
+# See the original
+ - Download the [original latest release](https://github.com/TotallyInformation/outlook-filer/releases/latest)
  - Unpack the *.frm and *.frx files to somewhere convenient.
  - Open the VBA project editor - you can use the alt-f11 keyboard shortcut
  - Import the *.frm file
@@ -18,10 +46,6 @@ Sub FileToFolder()
     FolderSelectBox.Show
 End Sub
 ```
-
- - Make sure that you have changed the settings to allow Outlook to run your code. 
-   You may wish to create a self-signed code signing certificate and sign your VBA code with that.
- - Customise the Ribbon, adding the ```FileToFolder``` macro as a button wherever convenient.
 
 # Basic Use
  - Select one or more emails, click on the macro button.
@@ -37,6 +61,16 @@ If you have your Outlook view in a conversation view mode, you can expand the co
 When you have many folders, it can be difficult to spot where they all are in the list - especially if you have sub-folders.
 
 This utility will help. If you can remember part of the folder name, click on the macro button, type in some characters to folder the list, select the required folder and click on the View button instead of File.
+
+
+# Remaining tasks
+   2) Add ability to move to another mailbox (http://www.slipstick.com/developer/working-vba-nondefault-outlook-folders/)
+   3) Allow multiple filters for full folder list
+   4) Pre-populate multi filters from conversation subject
+   5) List of recently selected folders (added by Nicole)
+   6) Double click to choose from recently selected folders
+   7) Send to all subfolders, not just 1st level below default inbox
+   8) View all subfolders not just 1st level below default inbox
 
 # License
 This utility including the code and the documentation is released under an [Apache 2.0 license](https://github.com/TotallyInformation/outlook-filer/blob/master/LICENSE).

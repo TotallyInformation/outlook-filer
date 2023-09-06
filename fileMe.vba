@@ -1,6 +1,7 @@
-' in the inbox. If one is found, move all of the other emails
-' to that folder.
 Sub fileMe()
+'Select several emails, if one or more are NOT in the inbox or sentItems, file everything in the other folder.
+' Checks for parent folder of selected items other than inbox and sent items. If one is found, move all of the other emails to that folder
+' Works well in conversation view where you select entire conversation then run macro.
     Dim myItem As Outlook.mailItem
     Dim myDestFolder As Outlook.Folder
     For Each myItem In Application.ActiveExplorer.Selection
